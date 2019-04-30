@@ -1,0 +1,26 @@
+- hosts: localhost
+  connection: local
+  become: yes
+  roles:
+  - mediawiki
+
+- hosts: launched
+  remote_user: ec2-user
+  become: yes
+  gather_facts: yes
+  tasks:
+  - name: ensure a list of packages installed
+    yum:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - httpd
+      - php
+      - php-mysql
+      - php-gd
+      - php-xml
+  - name: Unarchive a file that needs to be downloaded (added in 2.0)
+    unarchive:
+      src: https://releases.wikimedia.org/mediawiki/1.26/mediawiki-1.26.0.tar.gz
+      dest: /home/ec2-user/mediawiki
+      remote_src: yes
