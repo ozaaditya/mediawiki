@@ -1,0 +1,31 @@
+---
+# tasks file for mediawiki
+- elb_target_group:
+    name: tg-ohio-test-mediawiki
+    protocol: http
+    port: 80
+    vpc_id: "{{ mediawiki_vpc_id }}"
+    region: "{{ aws_region }}"
+    state: present
+  register: target
+- debug:
+    msg: "{{ target }}"
+- elb_application_lb:
+    name: myelb
+    region: "{{ aws_region }}"
+    security_groups: "{{ application_security_group[0] }}"
+    subnets: "{{ public_subnets }}"
+    listeners:
+      - Protocol: HTTP
+        Port: 80
+        DefaultActions:
+          - Type: forward
+            TargetGroupName: tg-ohio-test-mediawiki
+    state: present
+  register: app_lb
+- debug:
+    msg: "{{ app_lb }}"
+- name: save arn to use later
+  set_fact:
+    lbarn: "{{ target.target_group_arn }}"
+

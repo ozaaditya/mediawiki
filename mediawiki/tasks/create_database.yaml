@@ -1,0 +1,44 @@
+---
+- rds:
+    command: create
+    instance_name: mediawikidbinstance-test
+    db_engine: mariadb
+    db_name: mediawikidb_test
+    size: 20
+    instance_type: db.t2.micro
+    username: admin
+    password: "{{ db_password }}"
+    vpc_security_groups: "{{ database_security_group[0] }}"
+    subnet: db-subnet-group-ohio-t-mediawiki
+    region: "{{ aws_region }}"
+    tags:
+      Environment: test
+      Application: mediawiki
+    wait: yes
+    wait_timeout: 300
+- rds:
+    command: facts
+    instance_name: mediawikidbinstance-test
+    region: "{{ aws_region }}"
+  register: rds
+- debug:
+    msg: "The new db endpoint is {{ rds.instance.endpoint }}"
+- name: Create a new database with name 'wikidatabase'
+  mysql_db:
+    name: wikidatabase
+    state: present
+    login_host: "{{ rds.instance.endpoint }}"
+    login_user: admin
+    login_password: "{{ db_password }}"
+- mysql_user:
+    name: wiki
+    password: "{{ db_password }}"
+    priv: '*.*:select,update,delete,insert,create,drop,index,alter,lock tables,execute,create temporary tables,execute,trigger,create view,show view,event'
+    state: present
+    login_host: "{{ rds.instance.endpoint }}"
+    login_user: admin
+    login_password: "{{ db_password }}"
+- template:
+    src: LocalSettings.php
+    dest: "{{ workspace }}"
+

@@ -88,28 +88,8 @@
 - hosts: localhost
   connection: local
   become: yes
-  tasks:
-  - name: Create AMI
-    ec2_ami:
-      instance_id: "{{ instanceid }}"
-      wait: yes
-      name: MediaWiki
-      region: us-east-2
-      tags:
-        Name: Test
-        Service: Thoughtworks
-    register: ami
-  - debug:
-      msg: "{{ ami }}"
-  - name: create a cloudformation stack
-    cloudformation:
-      stack_name: "MediaWiki-AutoScaling"
-      state: "present"
-      region: "us-east-2"
-      template: "/home/ec2-user/autoscale-mediawiki.yaml"
-      template_parameters:
-        InstanceTypeParameter: "t2.micro"
-        ImageIdParameter: "{{ ami.image_id }}"
-        TargetGroupARNsParameter: "{{ lbarn }}"
-      tags:
-        Stack: "ansible-cloudformation"
+  roles:
+    - role: mediawiki-last
+      var:
+        instanceid: "{{ instanceid }}"
+        lbarn: "{{ lbarn }}"

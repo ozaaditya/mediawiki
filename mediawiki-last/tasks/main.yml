@@ -1,0 +1,27 @@
+---
+# tasks file for mediawiki-last
+- name: Create AMI
+  ec2_ami:
+    instance_id: "{{ instanceid }}"
+    wait: yes
+    name: MediaWiki
+    region: "{{ aws_region }}"
+    tags:
+      Name: Test
+      Service: Thoughtworks
+  register: ami
+- debug:
+    msg: "{{ ami }}"
+- name: create a cloudformation stack
+  cloudformation:
+    stack_name: "MediaWiki-AutoScaling"
+    state: "present"
+    region: "{{ aws_region }}"
+    template: "autoscale-mediawiki.yaml"
+    template_parameters:
+      InstanceTypeParameter: "t2.micro"
+      ImageIdParameter: "{{ ami.image_id }}"
+      TargetGroupARNsParameter: "{{ lbarn }}"
+    tags:
+      Stack: "ansible-cloudformation"
+
