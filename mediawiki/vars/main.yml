@@ -1,5 +1,14 @@
 ---
 # vars file for mediawiki
+aws_region: us-east-2
+mediawiki_vpc_id: vpc-08a02491160e8536d
+application_security_group:
+- sg-00b765b003a0aec03
+database_security_group:
+- sg-0a3d7a9b9ca5bd3de
+public_subnets:
+- subnet-0b8cf0ce4c6171ea3
+- subnet-0335acd13c99ee000
 db_password: !vault |
           $ANSIBLE_VAULT;1.1;AES256
           37613338336339393639653065643830313464623762333237336133306163653165383430323135
@@ -7,3 +16,4 @@ db_password: !vault |
           35373731326336363833393032643966306332393335363135656661626631326130316661346138
           3835326433653664350a623332383437353566303335333762306433636336366434396530363530
           3336
+key_pair: mediawiki
