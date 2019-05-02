@@ -55,7 +55,7 @@ $wgDBtype = "mysql";
 $wgDBserver = "{{ rds.instance.endpoint }}";
 $wgDBname = "wikidatabase";
 $wgDBuser = "admin";
-$wgDBpassword = "MediaWiki2019";
+$wgDBpassword = "{{ db_password }}";
 
 # MySQL specific settings
 $wgDBprefix = "";

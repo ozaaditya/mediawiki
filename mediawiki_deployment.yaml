@@ -72,9 +72,44 @@
       path: /etc/httpd/conf/httpd.conf
       regexp: '^    DirectoryIndex'
       line: '    DirectoryIndex index.html index.html.var index.php'
+  - name: example copying file with owner and permissions
+    copy:
+      src: /home/ec2-user/LocalSettings.php
+      dest: /home/ec2-user/mediawiki-1.26.0/LocalSettings.php
+      owner: apache
+      group: apache
+      mode: 0755
   - name: enable service httpd and ensure it is not masked
     systemd:
       name: httpd
       enabled: yes
       state: started
-  
+
+- hosts: localhost
+  connection: local
+  become: yes
+  tasks:
+  - name: Create AMI
+    ec2_ami:
+      instance_id: "{{ instanceid }}"
+      wait: yes
+      name: MediaWiki
+      region: us-east-2
+      tags:
+        Name: Test
+        Service: Thoughtworks
+    register: ami
+  - debug:
+      msg: "{{ ami }}"
+  - name: create a cloudformation stack
+    cloudformation:
+      stack_name: "MediaWiki-AutoScaling"
+      state: "present"
+      region: "us-east-2"
+      template: "/home/ec2-user/autoscale-mediawiki.yaml"
+      template_parameters:
+        InstanceTypeParameter: "t2.micro"
+        ImageIdParameter: "{{ ami.image_id }}"
+        TargetGroupARNsParameter: "{{ lbarn }}"
+      tags:
+        Stack: "ansible-cloudformation"
