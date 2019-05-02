@@ -60,7 +60,7 @@
   - name: Insert Directory block
     blockinfile:
       path: /etc/httpd/conf/httpd.conf
-      marker: "# ANSIBLE MANAGED BLOCK"
+      marker: "# {mark} ANSIBLE MANAGED BLOCK"
       insertafter: "DocumentRoot \"/var/www\""
       content: |
          <Directory "/var/www/mediawiki">
